@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ContactSchema } from "../models/crmModel";
+import { ContactSchema } from "../models/crmModel.js";
 
 const Contact = mongoose.model('Contact', ContactSchema);
 
@@ -14,8 +14,9 @@ export const getContacts = (req, res) => {
 
 export const getContactById = (req, res) => {
     Contact.findById(req.params.contactId, (err, contact) => {
-        if (err) {
-            res.send(err);
+        if (!contact) {
+            res.statusCode = 404;
+            res.send({ error: 'Not found' });
         }
         res.json(contact);
     });
@@ -34,18 +35,21 @@ export const addNewContact = (req, res) => {
 
 export const updateContact = (req, res) => {
     Contact.findOneAndUpdate({ _id: req.params.contactId }, req.body, { new: true }, (err, contact) => {
-        if (err) {
-            res.send(err);
+        if (!contact) {
+            res.statusCode = 404;
+            res.send({ error: 'Not found' });
         }
         res.json(contact);
     });
 };
 
 export const deleteContact = (req, res) => {
-    Contact.remove({ _id: req.params.contactId }, (err, contact) => {
-        if (err) {
-            res.send(err);
+
+    Contact.findByIdAndDelete({ _id: req.params.contactId }, (err, contact) => {
+        if (!contact) {
+            res.statusCode = 404;
+            return res.send({ error: 'Not found' });
         }
-        res.json({ message: 'Successfully deleted contact' });
+        return res.json({ message: 'Successfully deleted contact' });
     });
 };
